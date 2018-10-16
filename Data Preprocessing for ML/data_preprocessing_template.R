@@ -1,16 +1,25 @@
-# Data Preprocessing Template
+# Data Preprocessing
 
 # Importing the dataset
 dataset = read.csv('Data.csv')
 
-# Splitting the dataset into the Training set and Test set
-# install.packages('caTools')
+# Encoding categorical data
+dataset$Country = factor(dataset$Country,
+                         levels = c('France', 'Spain', 'Germany'),
+                         labels = c(1, 2, 3))
+dataset$Purchased = factor(dataset$Purchased,
+                           levels = c('No', 'Yes'),
+                           labels = c(0, 1))
+
+#Splitting the data into the Training Set and Test Set
+#install.packages('caTools')
 library(caTools)
 set.seed(123)
-split = sample.split(dataset$DependentVariable, SplitRatio = 0.8)
-training_set = subset(dataset, split == TRUE)
-test_set = subset(dataset, split == FALSE)
+split = sample.split(dataset$Purchased, SplitRatio = 0.8)
+training_Set = subset(dataset, split == TRUE)
+test_Set = subset(dataset, split == FALSE)
 
-# Feature Scaling
-# training_set = scale(training_set)
-# test_set = scale(test_set)
+#Feature Scaling
+training_Set[,2:3] = scale(training_Set[,2:3])
+test_Set[,2:3] = scale(test_Set[,2:3])
+
