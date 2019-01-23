@@ -1,0 +1,35 @@
+Regression - y = f(x). functional relationship between input and output.
+y = target,
+y = B + B1x1 + B2x2+ .......BnXn. Linear Regression
+y = B + B1X12 + B2X22+ .............BnnXnn Polynomial form.
+
+y = B + B1x1 + B2x2+ .......BnXn. Linear Regression
+Bo = Coefficients, or model paramters.
+
+Types of linear regression - 
+1. Simple Linear Regression -  if there is only one input.
+2. Multiple Linear Regression -  if there is multiple variance or input
+
+Ordinary Least Square - the squares of the E(epsilon) will be minimized.
+
+Assumptions in Linear Regression.
+ 1. Correlation this defines that how much linearity is there between any pair of varaiability, Range (1 to -1)
+			1 - highly correlated, 0 - means there is no any correlation. 
+ a) All Independnt Variable should have 0 correlation among themselves.
+ b) Every Independnt variable should be highly correlated.
+ 
+ 2. 'E'(Epsilon) follow normal distribution and  constant variance. (Homoskedasticity)
+ 3. 'E'(Epsilon) should follow IID(Independnt and Identically distributed)
+ 
+ Performance Metrics. (Aplicable to all)
+ 
+ 1. MAD/E (Mean Absolute Deviation/Error)
+	
+ 2. Mean Square Error. - shows outliers
+ 
+ 3. RMSE ( Root mean square error) - standard deviation which tells the dpread of the error
+ 
+ 4. Rsquare(2)
+	
+ 
+ 
