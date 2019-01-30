@@ -110,3 +110,24 @@ housing["population_per_household"]
 
 corr_matrix = housing.corr()
 corr_matrix["median_house_value"].sort_values(ascending = False) #shows bedrooms_per_room  is much more correlated with median house value than the total no of rooms or bedrooms
+
+housing = strat_train_set.drop("medain_house_value",axis=1) #drop creates the copy of the data and does not affect the  strat_train_set
+housing_labels = strat_train_set["median_house_value"].copy()
+
+#Data Cleaning (Removing the columns with the missing values Or filling with the median)
+median = housing["total_bedrooms"].median()
+housing["total_bedrooms"].fillna(median, inplace=True)
+
+#using Imputer
+from sklearn.preprocessing import Imputer
+imputer = Imputer(strategy="median")
+
+housing_num = housing.drop("ocean_proximity", axis=1)
+imputer.fit(housing_num) #imputer has computed the median of each attributes and stored the result in it's statistics_ instance variable.
+#it is safer to apply the imputer to all the numerical attributes as we can't be sure which column can't have missing values
+imputer.statistics_ #trained imputer which is based on the housing median price
+housing_num.median().values
+X = imputer.transform(housing_num) #The output is the trained numpy array
+
+#converting it the pandas DataFrame
+housing_tr = pd.DataFrame(X, columns=housing_num.columns)
