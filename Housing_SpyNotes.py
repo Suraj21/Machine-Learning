@@ -111,6 +111,7 @@ housing["population_per_household"]
 corr_matrix = housing.corr()
 corr_matrix["median_house_value"].sort_values(ascending = False) #shows bedrooms_per_room  is much more correlated with median house value than the total no of rooms or bedrooms
 
+#preparing the data for machine learning
 housing = strat_train_set.drop("medain_house_value",axis=1) #drop creates the copy of the data and does not affect the  strat_train_set
 housing_labels = strat_train_set["median_house_value"].copy()
 
@@ -131,3 +132,28 @@ X = imputer.transform(housing_num) #The output is the trained numpy array
 
 #converting it the pandas DataFrame
 housing_tr = pd.DataFrame(X, columns=housing_num.columns)
+
+# Handling text and categorical attributes
+from sklearn.preprocessing import LabelEncoder
+encoder = LabelEncoder()
+housing_cat = housing["ocean_proximity"]
+housing_cat_encoded = encoder.fit_transform(housing_cat) #fit_transform expects 2D array but housing_cat_encoded is 1D array and needs to be reshaped
+print(housing_cat_encoded)
+
+print(encoder.classes_)
+
+from sklearn.preprocesing import OneHotEncoder
+encoder = OneHotEncoder()
+housing_cat_1hot = encoder.fit_transform(housing_cat_encoded.reshape(-1,1))
+housing_cat_1hot # this will output in a sparse matrix to convert it to a dense matrix use to array
+housing_cat_1hot.toarray() # converting it to dense matrix
+
+# To aply both transformation i.e. from text categories to integer categories, then from 
+# integer categories to one-hot vectors in one shot we can use LableBinarizer class
+
+from sklearn.preprocessing import LabelBinarizer
+labelBinarizer_encoder = LabelBinarizer()
+housing_cat_1hot = labelBinarizer_encoder.fit_transform(housing_cat)
+housing_cat_1hot # this will output in the numpy dense array by default
+
+
