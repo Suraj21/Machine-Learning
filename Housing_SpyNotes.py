@@ -156,4 +156,45 @@ labelBinarizer_encoder = LabelBinarizer()
 housing_cat_1hot = labelBinarizer_encoder.fit_transform(housing_cat)
 housing_cat_1hot # this will output in the numpy dense array by default
 
+#Custom Transformers
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+rooms_ix, bedrooms_ix, population_ix, household_ix = 3,4,5,6
+
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def __init__(self, add_bedrooms_per_room = True): # no * args or ** kwargs
+        self.add_bedrooms_per_room = add_bedrooms_per_room
+        
+    def fit(self, X, y=None):
+        return self # nothinhg else to do
+    
+    def transform(self, X, y=None):
+        rooms_per_household = X[:,rooms_ix]/X[:, household_ix]
+        population_per_household = X[: population_ix] / X[:, rooms_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[X, rooms_per_household, population_per_household, bedrooms_per_room]
+        else:
+            return np.c_[X:, rooms_per_household, population_per_household]
+        
+attr_adder = CombinedAttributesAdder(add_bedrooms_per_room = False)
+housing_extra_attribs = attr_adder.transform(housing.values)
+
+#Transform Pipeline
+
+# There are many transformation steps that needs to be executed in the right order and for 
+# this Scikit-Learn provides the pipeline class to help with such sequences of transformation
+
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+num_pipeline = Pipeline([
+        ('imputer', Imputer(strategy="medium")),
+        ('attribs_adder',CombinedAttributesAdder()),
+        ('std_scaler',StandardScaler()),
+        ])
+
+housing_num_tr = num_pipeline.fit_transform(housing_num)
+
 

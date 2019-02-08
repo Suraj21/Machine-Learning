@@ -8,7 +8,7 @@ Created on Sun Nov 19 13:19:53 2017
 
 
 import os
-data_path = "E:/Class/Data/bbc/" # Data Path
+data_path = "D:/GitRepository/Machine-Learning/Natural Language Processing/Imarticus/bbc/" # Data Path
 directrys = os.listdir(data_path) #
 file_list = []  ; file_count =[]
 for path,direc,files in os.walk(data_path): 
@@ -47,12 +47,16 @@ import re # import regex library
 data_clean =[re.sub('[^a-zA-Z]+' , ' ' ,doc ) for doc in data] # For each file have only alphabeticals
 data_clean = [doc.lower() for doc in data_clean] # to lower case
 
+import nltk
+nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 tokenized_data = [word_tokenize(doc) for doc in data_clean]
 print (tokenized_data[0])
 
 
 # remove stop wors
+import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 x= stopwords.words('english') # this can be your own list of words
 d = []
@@ -66,6 +70,7 @@ for doc in tokenized_data:
 
 
 # stemming and lemmatizing
+nltk.download('wordnet')
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
 porter = PorterStemmer()
@@ -110,6 +115,10 @@ model.fit(X_train,y_train)
 
 predictions = model.predict(X)
 
+
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,predictions)
 
 from sklearn.metrics import accuracy_score
 accuracy_score(y_test,predictions)
