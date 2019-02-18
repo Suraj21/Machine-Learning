@@ -65,7 +65,7 @@ housing_with_id = housing.reset_index() # adds and 'index' column to the housig 
 train_set, test_set = split_train_test_by_id(housing_with_id, 0.2, "index")
 
 housing_with_id["id"] = housing["longitude"]*1000 + housing["latitude"]
-train_set, train_set = split_train_test_by_id(housing_with_id, 0.2, "id")
+train_set, test_set = split_train_test_by_id(housing_with_id, 0.2, "id")
 
 housing["income_cat"] = np.ceil(housing["median_income"] / 1.5)
 housing["income_cat"].where(housing["income_cat"] < 5, 5.0, inplace=True)
@@ -196,5 +196,60 @@ num_pipeline = Pipeline([
         ])
 
 housing_num_tr = num_pipeline.fit_transform(housing_num)
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+#This will transform the data by selecting the desired attributes, 
+#dropping the rest and converting the resulting DataFrame to NumPy array.
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X):
+        return X[self.attribute_names].values
+    
+num_attribs = list(housing_num)
+cat_attribs = ["ocean_proximity"]
+
+num_pipeline = Pipeline([
+        ('selector', DataFrameSelector(num_attribs)),
+        ('imputer', Imputer(strategy="median")),
+        ('attribs_adder', CombinedAttributesAdder()),
+        ('std_scaler',StandardScaler()),
+        ])
+    
+cat_pipeline = Pipeline([
+        ('selector', DataFrameSelector(cat_attribs)),
+        ('label_binarizer',LabelBinarizer()),
+        ])
+    
+#A Full pipeline handling both the numerical and categorical attributes
+
+from sklearn.pipeline import FeatureUnion
+
+full_pipeline = FeatureUnion(transformer_list = [
+        ("num_pipeline", num_pipeline),
+        ("cat_pipeline", cat_pipeline),
+        ])
+        
+housing_prepared = full_pipeline.fit_transform(housing)
+
+#Training and evaluating on the Training set
+from sklearn.linear_model import LinearRegression
+
+lin_reg = LinearRegression()
+lin_reg.fit(housing_prepared, housing_labels)
+
+some_data = housing.iloc[:5]
+some_labels = housing_labels.iloc[:5]
+some_data_prepared = full_pipeline.transform(some_data)
+lin_reg.predict(some_data_prepared)
+
+#Looking for RMSE error 
+from sklearn.metrics import mean_squared_error
+housing_predictions = lin_reg.predict(housing_prepared)
+lin_mse = mean_squared_error(housing_labels, housing_predictions)
+lin_mse = np.sqrt(lin_mse)
 
 

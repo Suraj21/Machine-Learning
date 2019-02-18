@@ -92,6 +92,7 @@ T = tfidf() # define tfidf object
 T.fit(X)  # fit for your data for td * idf value
 data_TFIDF= T.transform(X)  # transform to tf*idf array this will be a sparse matrix
 
+#featuresNames =  T.get_feature_names() get all the feature names
 
 # Sparsity reduction
 f = []
@@ -113,7 +114,7 @@ from sklearn.ensemble import RandomForestClassifier
 model = RandomForestClassifier(n_estimators=100 )
 model.fit(X_train,y_train)
 
-predictions = model.predict(X)
+predictions = model.predict(X_test)
 
 
 # Making the Confusion Matrix
