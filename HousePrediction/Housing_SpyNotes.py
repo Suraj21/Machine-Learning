@@ -190,7 +190,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 num_pipeline = Pipeline([
-        ('imputer', Imputer(strategy="medium")),
+        ('imputer', Imputer(strategy="median")),
         ('attribs_adder',CombinedAttributesAdder()),
         ('std_scaler',StandardScaler()),
         ])
@@ -218,7 +218,8 @@ num_pipeline = Pipeline([
         ('attribs_adder', CombinedAttributesAdder()),
         ('std_scaler',StandardScaler()),
         ])
-    
+
+from sklearn.preprocessing import LabelBinarizer
 cat_pipeline = Pipeline([
         ('selector', DataFrameSelector(cat_attribs)),
         ('label_binarizer',LabelBinarizer()),

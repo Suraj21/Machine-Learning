@@ -36,6 +36,9 @@ testID = test["Id"]
 train.drop("Id",axis=1,inplace= True)
 test.drop("Id",axis=1,inplace= True)
 
+#na_cutoff = 
+
+
 train.SalePrice.describe()
 
 plt.subplots(figsize=(10,7))
@@ -177,6 +180,54 @@ train_cat.drop("MoSold",axis = 1, inplace = True)
 train_cat.drop("YrSold",axis = 1, inplace = True)
 train_cat.drop("SalePrice",axis = 1, inplace = True)
 
+import category_encoders as ce
+# Get a new clean dataframe
+train_cat = train.select_dtypes(include=['object']).copy()
+
+# Specify the columns to encode then fit and transform
+encoder = ce.backward_difference.BackwardDifferenceEncoder(cols=["MSZoning",
+                                                                 "Street",
+                                                                 "LotShape",
+                                                                 "LandContour",
+                                                                 "Utilities",
+                                                                 "LotConfig",
+                                                                 "LandSlope",
+                                                                 "Neighborhood",
+                                                                 "Condition1",
+                                                                 "Condition2",
+                                                                 "BldgType",
+                                                                 "HouseStyle",
+                                                                 "RoofStyle",
+                                                                 "RoofMatl",
+                                                                 "Exterior1st",
+                                                                 "Exterior2nd",
+                                                                 "MasVnrType",
+                                                                 "ExterQual",
+                                                                 "ExterCond",
+                                                                 "Foundation",
+                                                                 "BsmtQual",
+                                                                 "BsmtCond",
+                                                                 "BsmtExposure",
+                                                                 "BsmtFinType1",
+                                                                 "BsmtFinType2",
+                                                                 "Heating",
+                                                                 "HeatingQC",
+                                                                 "CentralAir",
+                                                                 "Electrical",
+                                                                 "KitchenQual",
+                                                                 "Functional",
+                                                                 "GarageType",
+                                                                 "GarageFinish",
+                                                                 "GarageQual",
+                                                                 "GarageCond",
+                                                                 "PavedDrive",
+                                                                 "SaleType",
+                                                                 "SaleCondition"
+                                                                 ])
+encoder.fit(train_cat, verbose=1)
+
+train_tr = encoder.transform(train_cat)
+
 from sklearn.base import BaseEstimator, TransformerMixin
 
 #This will transform the data by selecting the desired attributes, 
@@ -188,7 +239,7 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         return self
     def transform(self, X):
         return X[self.attribute_names].values
-    
+
 num_attribs = list(train_num)
 cat_attribs = list(train_cat)
 
@@ -198,18 +249,24 @@ num_pipeline = Pipeline([
         ('std_scaler',StandardScaler()),
         ])
     
-cat_pipeline = Pipeline([
-        ('selector', DataFrameSelector(cat_attribs)),
-        ('label_binarizer',LabelBinarizer()),
-        ])
+#cat_pipeline = Pipeline([
+#        ('selector', DataFrameSelector(cat_attribs)),
+#        ('label_binarizer',MyLabelBinarizer()),
+#        ])
+    
     
 #A Full pipeline handling both the numerical and categorical attributes
 
 from sklearn.pipeline import FeatureUnion
 
 full_pipeline = FeatureUnion(transformer_list = [
-        ("num_pipeline", num_pipeline),
-        ("cat_pipeline", cat_pipeline),
+        ("num_pipeline", num_pipeline)
         ])
+    
+#     ("cat_pipeline", cat_pipeline),
         
 train_prepared = full_pipeline.fit_transform(train)
+
+pd.DataFrame(data=train_prepared[1:,1:], index=train_prepared[1:,0], columns=train_prepared[0,1:])  # 1st row as the column names
+
+train_Full = train_tr.append(train_prepared, ignore_index = True)
