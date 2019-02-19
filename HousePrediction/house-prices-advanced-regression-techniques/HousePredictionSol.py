@@ -267,6 +267,8 @@ full_pipeline = FeatureUnion(transformer_list = [
         
 train_prepared = full_pipeline.fit_transform(train)
 
-pd.DataFrame(data=train_prepared[1:,1:], index=train_prepared[1:,0], columns=train_prepared[0,1:])  # 1st row as the column names
+index = [i for i in range(0, len(train_prepared))]
 
-train_Full = train_tr.append(train_prepared, ignore_index = True)
+df = pd.DataFrame(data=train_prepared, index= index)
+
+train_Full = train_tr.append(df, ignore_index = True)
