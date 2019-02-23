@@ -81,6 +81,12 @@ train.drop("PoolQC", axis = 1, inplace = True)
 train.drop("Fence", axis = 1, inplace = True)
 train.drop("MiscFeature", axis = 1, inplace = True)
 
+test.drop("Alley", axis = 1, inplace = True)
+test.drop("FireplaceQu", axis = 1, inplace = True)
+test.drop("PoolQC", axis = 1, inplace = True)
+test.drop("Fence", axis = 1, inplace = True)
+test.drop("MiscFeature", axis = 1, inplace = True)
+
 # Seperating the output label
 train_Labels = train["SalePrice"]
 train.drop("SalePrice",axis = 1, inplace = True)
@@ -107,17 +113,38 @@ class DataFrameImputer(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         return X.fillna(self.fill)
-
+    
+# Imputing the training data
 train_temp = DataFrameImputer().fit_transform(train)
+
+# Imputing the test data
+test_temp = DataFrameImputer().fit_transform(test)
 
 #2. (DataCleanUp) Handling the Text and Categorical attributes. Convert Categorical data into numbers (i.e. LabelEncoding and OneHotEncoding)
 train_tr = pd.get_dummies(train_temp)
+
+# Handling the categorical data of test
+test_tr = pd.get_dummies(test_temp)
+
+non_matching_col =  list(set(list(train_tr)) ^ set(list(test_tr)))
+
+for col in non_matching_col:
+    if(col in train_tr.columns):
+        train_tr.drop(col, axis = 1, inplace = True)
+    if(col in test_tr.columns):
+        train_tr.drop(col, axis = 1, inplace = True)
 
 #3. (DataCleanUp) Feature Scaling. Standard Scaling the dataset i.e. converting the dataset value in between -1 to 1
 standardScalerX = StandardScaler()
 train_sclr = standardScalerX.fit_transform(train_tr)
 
+# Scaling the test data set
+test_sclr = standardScalerX.fit_transform(test_tr)
+
 # Training the Model
 from sklearn.linear_model import LinearRegression
 lin_reg = LinearRegression()
 lin_reg.fit(train_sclr, train_Labels)
+
+# Predict the output
+predict = lin_reg.predict(test_sclr);
