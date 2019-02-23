@@ -11,9 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 np.set_printoptions(threshold=np.nan)
-from sklearn.preprocessing import Imputer
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.pipeline import Pipeline
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
 
 def load_housing_data(housing_path,fileName):
@@ -36,8 +34,7 @@ testID = test["Id"]
 train.drop("Id",axis=1,inplace= True)
 test.drop("Id",axis=1,inplace= True)
 
-#na_cutoff = 
-
+na_cutoff = 0.2
 
 train.SalePrice.describe()
 
@@ -84,191 +81,43 @@ train.drop("PoolQC", axis = 1, inplace = True)
 train.drop("Fence", axis = 1, inplace = True)
 train.drop("MiscFeature", axis = 1, inplace = True)
 
-train_num = train.copy()
+# Seperating the output label
+train_Labels = train["SalePrice"]
+train.drop("SalePrice",axis = 1, inplace = True)
 
-train_num.drop("MSZoning",axis = 1, inplace = True)
-train_num.drop("Street",axis = 1, inplace = True)
-train_num.drop("LotShape",axis = 1, inplace = True)
-train_num.drop("LandContour",axis = 1, inplace = True)
-train_num.drop("Utilities",axis = 1, inplace = True)
-train_num.drop("LotConfig",axis = 1, inplace = True)
-train_num.drop("LandSlope",axis = 1, inplace = True)
-train_num.drop("Neighborhood",axis = 1, inplace = True)
-train_num.drop("Condition1",axis = 1, inplace = True)
-train_num.drop("Condition2",axis = 1, inplace = True)
-train_num.drop("BldgType",axis = 1, inplace = True)
-train_num.drop("HouseStyle",axis = 1, inplace = True)
-train_num.drop("RoofStyle",axis = 1, inplace = True)
-train_num.drop("RoofMatl",axis = 1, inplace = True)
-train_num.drop("Exterior1st",axis = 1, inplace = True)
-train_num.drop("Exterior2nd",axis = 1, inplace = True)
-train_num.drop("MasVnrType",axis = 1, inplace = True)
-train_num.drop("ExterQual",axis = 1, inplace = True)
-train_num.drop("ExterCond",axis = 1, inplace = True)
-train_num.drop("Foundation",axis = 1, inplace = True)
-train_num.drop("BsmtQual",axis = 1, inplace = True)
-train_num.drop("BsmtCond",axis = 1, inplace = True)
-train_num.drop("BsmtExposure",axis = 1, inplace = True)
-train_num.drop("BsmtFinType1",axis = 1, inplace = True)
-train_num.drop("BsmtFinType2",axis = 1, inplace = True)
-train_num.drop("Heating",axis = 1, inplace = True)
-train_num.drop("HeatingQC",axis = 1, inplace = True)
-train_num.drop("CentralAir",axis = 1, inplace = True)
-train_num.drop("Electrical",axis = 1, inplace = True)
-train_num.drop("KitchenQual",axis = 1, inplace = True)
-train_num.drop("Functional",axis = 1, inplace = True)
-train_num.drop("GarageType",axis = 1, inplace = True)
-train_num.drop("GarageFinish",axis = 1, inplace = True)
-train_num.drop("GarageQual",axis = 1, inplace = True)
-train_num.drop("GarageCond",axis = 1, inplace = True)
-train_num.drop("PavedDrive",axis = 1, inplace = True)
-train_num.drop("SaleType",axis = 1, inplace = True)
-train_num.drop("SaleCondition",axis = 1, inplace = True)
+# 1. (DataCleanUp) Replace nan value
+class DataFrameImputer(BaseEstimator, TransformerMixin):
 
-## 1. Data Cleaning Removing the nan data from the numerical columns
-#imputer = Imputer(strategy="median")
-#imputer.fit(train_num) #training the imputer 
-##using the trained imputer to replace the missing values
-#X = imputer.transform(train_num)
-#
-##train_bk = train
-##train = train_bk
-#
-##putting back the imputed data to the pandas dataframe i.e data replaced with the num
-#train_tr = pd.DataFrame(X, columns=train_num.columns)
+    def __init__(self):
+        """Impute missing values.
 
-#imputer.statistics_
+        Columns of dtype object are imputed with the most frequent value 
+        in column.
 
-# 2. Handling text and categorical Attributes
-train_cat = train.copy()
+        Columns of other types are imputed with mean of column.
 
-train_cat.drop("MSSubClass",axis = 1, inplace = True)
-train_cat.drop("LotFrontage",axis = 1, inplace = True)
-train_cat.drop("LotArea",axis = 1, inplace = True)
-train_cat.drop("OverallQual",axis = 1, inplace = True)
-train_cat.drop("OverallCond",axis = 1, inplace = True)
-train_cat.drop("YearBuilt",axis = 1, inplace = True)
-train_cat.drop("YearRemodAdd",axis = 1, inplace = True)
-train_cat.drop("MasVnrArea",axis = 1, inplace = True)
-train_cat.drop("BsmtFinSF1",axis = 1, inplace = True)
-train_cat.drop("BsmtFinSF2",axis = 1, inplace = True)
-train_cat.drop("BsmtUnfSF",axis = 1, inplace = True)
-train_cat.drop("TotalBsmtSF",axis = 1, inplace = True)
-train_cat.drop("1stFlrSF",axis = 1, inplace = True)
-train_cat.drop("2ndFlrSF",axis = 1, inplace = True)
-train_cat.drop("BsmtHalfBath",axis = 1, inplace = True)
-train_cat.drop("LowQualFinSF",axis = 1, inplace = True)
-train_cat.drop("GrLivArea",axis = 1, inplace = True)
-train_cat.drop("BsmtFullBath",axis = 1, inplace = True)
-train_cat.drop("FullBath",axis = 1, inplace = True)
-train_cat.drop("HalfBath",axis = 1, inplace = True)
-train_cat.drop("BedroomAbvGr",axis = 1, inplace = True)
-train_cat.drop("KitchenAbvGr",axis = 1, inplace = True)
-train_cat.drop("TotRmsAbvGrd",axis = 1, inplace = True)
-train_cat.drop("Fireplaces",axis = 1, inplace = True)
-train_cat.drop("GarageYrBlt",axis = 1, inplace = True)
-train_cat.drop("GarageCars",axis = 1, inplace = True)
-train_cat.drop("GarageArea",axis = 1, inplace = True)
-train_cat.drop("WoodDeckSF",axis = 1, inplace = True)
-train_cat.drop("OpenPorchSF",axis = 1, inplace = True)
-train_cat.drop("EnclosedPorch",axis = 1, inplace = True)
-train_cat.drop("3SsnPorch",axis = 1, inplace = True)
-train_cat.drop("ScreenPorch",axis = 1, inplace = True)
-train_cat.drop("PoolArea",axis = 1, inplace = True)
-train_cat.drop("MiscVal",axis = 1, inplace = True)
-train_cat.drop("MoSold",axis = 1, inplace = True)
-train_cat.drop("YrSold",axis = 1, inplace = True)
-train_cat.drop("SalePrice",axis = 1, inplace = True)
-
-import category_encoders as ce
-# Get a new clean dataframe
-train_cat = train.select_dtypes(include=['object']).copy()
-
-# Specify the columns to encode then fit and transform
-encoder = ce.backward_difference.BackwardDifferenceEncoder(cols=["MSZoning",
-                                                                 "Street",
-                                                                 "LotShape",
-                                                                 "LandContour",
-                                                                 "Utilities",
-                                                                 "LotConfig",
-                                                                 "LandSlope",
-                                                                 "Neighborhood",
-                                                                 "Condition1",
-                                                                 "Condition2",
-                                                                 "BldgType",
-                                                                 "HouseStyle",
-                                                                 "RoofStyle",
-                                                                 "RoofMatl",
-                                                                 "Exterior1st",
-                                                                 "Exterior2nd",
-                                                                 "MasVnrType",
-                                                                 "ExterQual",
-                                                                 "ExterCond",
-                                                                 "Foundation",
-                                                                 "BsmtQual",
-                                                                 "BsmtCond",
-                                                                 "BsmtExposure",
-                                                                 "BsmtFinType1",
-                                                                 "BsmtFinType2",
-                                                                 "Heating",
-                                                                 "HeatingQC",
-                                                                 "CentralAir",
-                                                                 "Electrical",
-                                                                 "KitchenQual",
-                                                                 "Functional",
-                                                                 "GarageType",
-                                                                 "GarageFinish",
-                                                                 "GarageQual",
-                                                                 "GarageCond",
-                                                                 "PavedDrive",
-                                                                 "SaleType",
-                                                                 "SaleCondition"
-                                                                 ])
-encoder.fit(train_cat, verbose=1)
-
-train_tr = encoder.transform(train_cat)
-
-from sklearn.base import BaseEstimator, TransformerMixin
-
-#This will transform the data by selecting the desired attributes, 
-#dropping the rest and converting the resulting DataFrame to NumPy array.
-class DataFrameSelector(BaseEstimator, TransformerMixin):
-    def __init__(self, attribute_names):
-        self.attribute_names = attribute_names
+        """
     def fit(self, X, y=None):
+
+        self.fill = pd.Series([X[c].value_counts().index[0]
+            if X[c].dtype == np.dtype('O') else X[c].mean() for c in X],
+            index=X.columns)
+
         return self
-    def transform(self, X):
-        return X[self.attribute_names].values
 
-num_attribs = list(train_num)
-cat_attribs = list(train_cat)
+    def transform(self, X, y=None):
+        return X.fillna(self.fill)
 
-num_pipeline = Pipeline([
-        ('selector', DataFrameSelector(num_attribs)),
-        ('imputer', Imputer(strategy="median")),
-        ('std_scaler',StandardScaler()),
-        ])
-    
-#cat_pipeline = Pipeline([
-#        ('selector', DataFrameSelector(cat_attribs)),
-#        ('label_binarizer',MyLabelBinarizer()),
-#        ])
-    
-    
-#A Full pipeline handling both the numerical and categorical attributes
+train_temp = DataFrameImputer().fit_transform(train)
 
-from sklearn.pipeline import FeatureUnion
+#2. (DataCleanUp) Handling the Text and Categorical attributes. Convert Categorical data into numbers (i.e. LabelEncoding and OneHotEncoding)
+train_tr = pd.get_dummies(train_temp)
 
-full_pipeline = FeatureUnion(transformer_list = [
-        ("num_pipeline", num_pipeline)
-        ])
-    
-#     ("cat_pipeline", cat_pipeline),
-        
-train_prepared = full_pipeline.fit_transform(train)
+#3. (DataCleanUp) Feature Scaling. Standard Scaling the dataset i.e. converting the dataset value in between -1 to 1
+standardScalerX = StandardScaler()
+train_sclr = standardScalerX.fit_transform(train_tr)
 
-index = [i for i in range(0, len(train_prepared))]
-
-df = pd.DataFrame(data=train_prepared, index= index)
-
-train_Full = train_tr.append(df, ignore_index = True)
+# Training the Model
+from sklearn.linear_model import LinearRegression
+lin_reg = LinearRegression()
+lin_reg.fit(train_sclr, train_Labels)
