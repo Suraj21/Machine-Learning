@@ -13,6 +13,7 @@ import seaborn as sns
 np.set_printoptions(threshold=np.nan)
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
 
 def load_housing_data(housing_path,fileName):
     csv_path = os.path.join(housing_path, fileName)
@@ -148,3 +149,8 @@ lin_reg.fit(train_sclr, train_Labels)
 
 # Predict the output
 predict = lin_reg.predict(test_sclr);
+
+train_Labels = train_Labels.drop(labels = [1459])
+
+lin_mse = mean_squared_error(train_Labels, predict)
+lin_rmse = np.sqrt(lin_mse)
