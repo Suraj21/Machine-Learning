@@ -76,6 +76,8 @@ plt.xticks(rotation=90)
 
 train.info()
 
+# Dropping the columns from train and test set with max no of missing values
+
 train.drop("Alley", axis = 1, inplace = True)
 train.drop("FireplaceQu", axis = 1, inplace = True)
 train.drop("PoolQC", axis = 1, inplace = True)
