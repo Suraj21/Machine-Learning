@@ -63,7 +63,9 @@ for train_index, test_index in skfolds.split(X_train, y_train_5):
     
 #Measuring accuracy using cross val score
 from sklearn.model_selection import cross_val_score
-cross_val_score(sgd_clf, X_train, y_train_5, cv = 5, scoring="accuracy")
+accuracies = cross_val_score(sgd_clf, X_train, y_train_5, cv = 5, scoring="accuracy")
+accuracies.mean()
+accuracies.std()
 
 #CLassifier to classifies that every single image is not 5
 from sklearn.base import BaseEstimator
@@ -80,7 +82,7 @@ never_5_clf = Never5Classifier()
 
 from sklearn.model_selection import cross_val_predict
 
-y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, scoring="accuracy")
+y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3)
 
 
 # Confusion Matrix
@@ -130,8 +132,100 @@ y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv = 3, method="decisi
 from sklearn.metrics import precision_recall_curve
 precisions, recalls , thresholdsa = precision_recall_curve(y_train_5, y_scores)
 
+def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
+    plt.plot(thresholds, precisions[:1], "b--", label="precision")
+    plt.plot(thresholds, recalls[:-1], "g-", label="Recall")
+    plt.xlabel("Threshold")
+    plt.legend(loc="upper left")
+    plt.ylim([0,1])
+    
+    
+y_train_pred_90 = (y_scores > 70000)
+precision_score(y_train_5, y_train_pred_90)
+recall_score(y_train_5, y_train_pred_90)
+
+# ROC Curve (receiver operating characteristic) another tool used with binary classifiers
+# It plots curve between true positive rate(Recall) against the false positive rate(i.e. ratio of negative
+# instances that are incorrectly classified as positive (equal to 1- true negative rate(ratio of negative 
+# instances that are correctly classified as negative))).
+
+# TNR is also called as specificity.
+# ROC plots sensitivity(recall) versus 1 - specificity.
+
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
+
+def plot_roc_curve(fpr, tpr, label=None):
+    plt.plot(fpr, tpr, linewidth=2, label=label)
+    plt.plot([0,1], [0,1], 'k--')
+    plt.axis([0,1,0,1])
+    plt.xlabel('False positive Rate')
+    plt.ylabel('True Positive Rate')
+    
+plot_roc_curve(fpr, tpr)
+plt.show()
+
+#The higher the recall (TPR), the more false positives (FPR) the classifier produces
+#Area under curve (AUC)
+#A perfect classifier will have ROC AUC eqal to 1, where random classifier will have a ROC AUC equal to 0.5
+# scikit-Learn provides a function to compute the ROC AUC:
+from sklearn.metrics import roc_auc_score
+roc_auc_score(y_train_5, y_scores)
+
+# using Radom Forest Classifier
+
+from sklearn.ensemble import RandomForestClassifier
+forest_clf = RandomForestClassifier(random_state = 42)
+y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv = 3, method = "predict_proba")
+
+# But to plot we need scores not the probabilites. To solve this use the positive class probability as the score
+y_scores_forest = y_probas_forest[:,1] # score = proba of positive class
+fpr_forest, tpr_forest, threshold_forest = roc_curve(y_train_5, y_scores_forest)
+
+plt.plot(fpr, tpr, "b:",label="SGD")
+plot_roc_curve(fpr_forest, tpr_forest, "Random Forest")
+plt.legend(loc="lower right")
+plt.show()
+
+roc_auc_score(y_train_5, y_scores_forest)
+
+precision_score(y_train_5, y_scores_forest)
+recall_score(y_train_5, y_scores_forest)
+
+#Multiclass classification 
+# Scikit-Learn detects when we try to use a binary classification algorithm for a multi class classification
+# task, and it automatically runs OvA i.e. One versus All (except for SVM classifiers for which it uses OvO)
+
+sgd_clf.fit(X_train, y_train) # this trains 10 binary classifiers, got their decision scores for the image and selected the class with the highest score.
+sgd_clf.predict([some_digit])
+
+some_digit_scores = sgd_clf.decision_function([some_digit])
+np.argmax(some_digit_scores)
+
+sgd_clf.classes_
 
 
+# If we want to force the Scikit Learn to use one-versus-one or one-versu-all, the we can use 
+# OneVsOneClassifier or OneVsRestClassifier classes.
+
+from sklearn.multiclass import OneVsOneClassifier
+ovo_clf = OneVsOneClassifier(SGDClassifier(random_state=42))
+ovo_clf.fit(X_train, y_train)
+ovo_clf.predict([some_digit])
+
+#Training the RandomForestClassifier
+forest_clf.fit(X_train, y_train)
+forest_clf.predict([some_digit])
+forest_clf.predict_proba([some_digit]) #gets the list of probabilities that the classifier assigned to each instance for each class
+
+cross_val_score(sgd_clf, X_train, y_train, cv = 3, scoring="accuracy")
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
+cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
+
+# Error Analysis
 
     
     
