@@ -29,7 +29,8 @@ Assumptions in Linear Regression.
  
  3. RMSE ( Root mean square error) - standard deviation which tells the dpread of the error
  
- 4. Rsquare(2)
+ 4. Rsquare(2) - for population
+	for sample - Adjusted Rsquare
 	
  
  
