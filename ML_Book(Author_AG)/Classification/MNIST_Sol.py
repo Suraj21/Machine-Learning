@@ -6,7 +6,7 @@ Created on Fri Mar  1 08:39:46 2019
 """
 
 from scipy.io import loadmat
-mnist = loadmat("D:\GitRepository\Machine-Learning\Classification\ML_AG_Book\Classification\mnist-original.mat\mnist-original")
+mnist = loadmat("D:\GitRepository\Machine-Learning\ML_Datasets\mnist-original")
 X = mnist["data"].T
 y = mnist["label"][0]
 
@@ -226,6 +226,41 @@ X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
 cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
 
 # Error Analysis
+y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
+conf_mx = confusion_matrix(y_train, y_train_pred)
+    
+plt.matshow(conf_mx, cmap=plt.cm.gray)
+plt.show()
+    
 
-    
-    
+# Divide each value in the confusion matrix by the no of images in the corresponding class, so we can 
+# compare error rates instead of absolute error
+
+row_sums = conf_mx.sum(axis=1, keepdims=True)
+norm_conf_mx = conf_mx/row_sums
+
+# Lets fill the diagonal with zeros to kep only the errors.
+np.fill_diagonal(norm_conf_mx,0)
+plt.matshow(norm_conf_mx, cmap=plt.cm.gray)
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
